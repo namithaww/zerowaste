@@ -1,59 +1,65 @@
 import React, { useEffect, useState } from "react";
 import { auth, db } from "../firebase";
-import { signOut } from "firebase/auth";
 import { doc, getDoc } from "firebase/firestore";
+import { signOut as firebaseSignOut } from "firebase/auth";
 import { useNavigate } from "react-router-dom";
 import CreateDonation from "./CreateDonation";
 import MyDonations from "./MyDonations";
+import { getDoc as getFirestoreDoc, doc as firestoreDoc } from "firebase/firestore";
 
 const Dashboard = () => {
-  const [role, setRole] = useState(null);
+  const [userData, setUserData] = useState({ name: "", role: "" });
   const navigate = useNavigate();
 
   useEffect(() => {
-    const fetchUserRole = async () => {
+    const fetchUserDetails = async () => {
       const user = auth.currentUser;
       if (!user) return;
 
-      const docRef = doc(db, "users", user.uid);
-      const docSnap = await getDoc(docRef);
+      try {
+        const userRef = firestoreDoc(db, "users", user.uid);
+        const userSnap = await getFirestoreDoc(userRef);
 
-      if (docSnap.exists()) {
-        const userRole = docSnap.data().role;
-        setRole(userRole.toLowerCase()); // Normalize to lowercase
-      } else {
-        console.log("No such document!");
+        if (userSnap.exists()) {
+          setUserData(userSnap.data());
+        } else {
+          console.warn("User document does not exist in Firestore.");
+        }
+      } catch (error) {
+        console.error("Failed to fetch user data:", error);
       }
     };
 
-    fetchUserRole();
+    fetchUserDetails();
   }, []);
 
   const handleLogout = async () => {
-    await signOut(auth);
-    navigate("/");
+    try {
+      await firebaseSignOut(auth);
+      navigate("/");
+    } catch (err) {
+      console.error("Logout error:", err);
+    }
   };
 
+  const user = auth.currentUser;
+
   return (
-    <div style={{ textAlign: "center", marginTop: "50px" }}>
-      <h1>Welcome to ZeroWaste Dashboard</h1>
+    <div style={{ textAlign: "center", marginTop: "40px", color: "white" }}>
+      <h1>
+        Welcome,<br />
+        <span style={{ fontWeight: "bold" }}>
+          {userData.name || user?.email}
+        </span>
+      </h1>
+      <p>Role: {userData.role}</p>
 
-      {role === "donor" && (
-        <>
-          <p>You are a Donor. You can create food donation listings here.</p>
-          <CreateDonation />
-          <MyDonations/>
-        </>
-      )}
+      <button onClick={handleLogout} style={{ padding: "10px 20px", marginBottom: "20px" }}>
+        Logout
+      </button>
 
-      {role === "receiver" && (
-        <p>You are a Receiver. You can explore food listings near you.</p>
-      )}
-
-      {!role && <p>Loading your role...</p>}
-
-      <br />
-      <button onClick={handleLogout}>Logout</button>
+      <CreateDonation />
+      <MyDonations />
     </div>
   );
 };

@@ -6,32 +6,33 @@ const MyDonations = () => {
   const [donations, setDonations] = useState([]);
   const [loading, setLoading] = useState(true);
 
+  const fetchMyDonations = async () => {
+    setLoading(true);
+    try {
+      const user = auth.currentUser;
+      if (!user) return;
+
+      const q = query(
+        collection(db, "donations"),
+        where("donorId", "==", user.uid),
+        orderBy("createdAt", "desc")
+      );
+
+      const querySnapshot = await getDocs(q);
+      const myDonations = querySnapshot.docs.map((doc) => ({
+        id: doc.id,
+        ...doc.data(),
+      }));
+
+      setDonations(myDonations);
+    } catch (error) {
+      console.error("Error fetching donations:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   useEffect(() => {
-    const fetchMyDonations = async () => {
-      try {
-        const user = auth.currentUser;
-        if (!user) return;
-
-        const q = query(
-          collection(db, "donations"),
-          where("donorId", "==", user.uid),
-          orderBy("createdAt", "desc")
-        );
-
-        const querySnapshot = await getDocs(q);
-        const myDonations = querySnapshot.docs.map((doc) => ({
-          id: doc.id,
-          ...doc.data(),
-        }));
-
-        setDonations(myDonations);
-        setLoading(false);
-      } catch (error) {
-        console.error("Error fetching donations:", error);
-        setLoading(false);
-      }
-    };
-
     fetchMyDonations();
   }, []);
 

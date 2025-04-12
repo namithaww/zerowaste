@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { db, auth } from "../firebase";
 import { collection, addDoc, serverTimestamp } from "firebase/firestore";
 
-const CreateDonation = () => {
+const CreateDonation = ({ onDonationCreated }) => {
   const [formData, setFormData] = useState({
     foodItem: "",
     quantity: "",
@@ -42,6 +42,10 @@ const CreateDonation = () => {
         location: "",
         additionalInfo: "",
       });
+
+      if (onDonationCreated) {
+        onDonationCreated(); // 👈 notify parent to refresh list
+      }
     } catch (error) {
       console.error("Error adding donation: ", error);
       setSuccessMsg("Something went wrong. Please try again.");

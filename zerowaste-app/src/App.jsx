@@ -1,19 +1,31 @@
-// App.jsx
 import React, { useEffect, useState } from "react";
-import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
+import { Routes, Route, useNavigate } from "react-router-dom";
 import Auth from "./components/Auth";
 import Dashboard from "./components/Dashboard";
-import { auth } from "./firebase";
-import { onAuthStateChanged } from "firebase/auth";
-import PrivateRoute from "./components/PrivateRoute";
+import ReceiverDashboard from "./components/ReceiverDashboard";
+import { auth, db } from "./firebase";
+import { doc, getDoc } from "firebase/firestore";
 
-function App() {
+const App = () => {
   const [user, setUser] = useState(null);
+  const [role, setRole] = useState(null);
   const [loading, setLoading] = useState(true);
+  const navigate = useNavigate();
 
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
-      setUser(currentUser);
+    const unsubscribe = auth.onAuthStateChanged(async (currentUser) => {
+      if (currentUser) {
+        setUser(currentUser);
+        const userDoc = await getDoc(doc(db, "users", currentUser.uid));
+        if (userDoc.exists()) {
+          const userData = userDoc.data();
+          setRole(userData.role);
+          navigate("/dashboard");
+        }
+      } else {
+        setUser(null);
+        setRole(null);
+      }
       setLoading(false);
     });
 
@@ -23,20 +35,17 @@ function App() {
   if (loading) return <p>Loading...</p>;
 
   return (
-    <Router>
-      <Routes>
-        <Route path="/" element={!user ? <Auth /> : <Navigate to="/dashboard" />} />
-        <Route
-          path="/dashboard"
-          element={
-            <PrivateRoute>
-              <Dashboard />
-            </PrivateRoute>
-          }
-        />
-      </Routes>
-    </Router>
+    <Routes>
+      <Route path="/" element={<Auth />} />
+      {user && role === "Donor" && (
+        <Route path="/dashboard" element={<Dashboard />} />
+      )}
+      {user && role === "Receiver" && (
+        <Route path="/dashboard" element={<ReceiverDashboard />} />
+      )}
+      <Route path="*" element={<Auth />} />
+    </Routes>
   );
-}
+};
 
 export default App;
