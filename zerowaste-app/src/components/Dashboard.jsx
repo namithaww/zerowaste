@@ -5,7 +5,7 @@ import { signOut as firebaseSignOut } from "firebase/auth";
 import { useNavigate } from "react-router-dom";
 import CreateDonation from "./CreateDonation";
 import MyDonations from "./MyDonations";
-import { getDoc as getFirestoreDoc, doc as firestoreDoc } from "firebase/firestore";
+import "./DonorDashboard.css"; // CSS styles
 
 const Dashboard = () => {
   const [userData, setUserData] = useState({ name: "", role: "" });
@@ -17,8 +17,8 @@ const Dashboard = () => {
       if (!user) return;
 
       try {
-        const userRef = firestoreDoc(db, "users", user.uid);
-        const userSnap = await getFirestoreDoc(userRef);
+        const userRef = doc(db, "users", user.uid);
+        const userSnap = await getDoc(userRef);
 
         if (userSnap.exists()) {
           setUserData(userSnap.data());
@@ -45,21 +45,29 @@ const Dashboard = () => {
   const user = auth.currentUser;
 
   return (
-    <div style={{ textAlign: "center", marginTop: "40px", color: "white" }}>
-      <h1>
-        Welcome,<br />
-        <span style={{ fontWeight: "bold" }}>
-          {userData.name || user?.email}
-        </span>
-      </h1>
-      <p>Role: {userData.role}</p>
+    <div className="dashboard-container">
+      <div className="dashboard-header">
+        <h1>
+          Welcome,
+          <br />
+          <span>{userData.name || user?.email}</span>
+        </h1>
+        <p className="role-text">Role: {userData.role}</p>
+        <button onClick={handleLogout} className="logout-button">
+          Logout
+        </button>
+      </div>
 
-      <button onClick={handleLogout} style={{ padding: "10px 20px", marginBottom: "20px" }}>
-        Logout
-      </button>
-
-      <CreateDonation />
-      <MyDonations />
+      <div className="dashboard-content">
+        <div className="create-section">
+          {/* <h2>Create a Donation</h2> */}
+          <CreateDonation />
+        </div>
+        <div className="my-donations-section">
+          {/* <h2>My Donations</h2> */}
+          <MyDonations />
+        </div>
+      </div>
     </div>
   );
 };

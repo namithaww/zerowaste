@@ -1,0 +1,72 @@
+/* DonorDashboard.css */
+
+body {
+    margin: 0;
+    font-family: 'Segoe UI', sans-serif;
+    background-color: #1c1c1c;
+    color: #fff;
+  }
+  
+  .dashboard-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 40px 20px;
+    max-width: 1200px;
+    margin: 0 auto;
+  }
+  
+  .dashboard-header {
+    text-align: center;
+    margin-bottom: 40px;
+  }
+  
+  .dashboard-header h1 {
+    font-size: 2.5rem;
+    margin-bottom: 10px;
+  }
+  
+  .dashboard-header span {
+    font-weight: bold;
+    color: #00ffff;
+  }
+  
+  .role-text {
+    font-size: 1.2rem;
+    color: #aaa;
+    margin-bottom: 20px;
+  }
+  
+  .logout-button {
+    padding: 10px 20px;
+    background-color: #ff4d4f;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+  }
+  
+  .logout-button:hover {
+    background-color: #ff7875;
+  }
+  
+  .dashboard-content {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    width: 100%;
+    gap: 40px;
+  }
+  
+  .create-section,
+  .my-donations-section {
+    flex: 1;
+    min-width: 300px;
+  }
+  
+  .create-section h2,
+  .my-donations-section h2 {
+    margin-bottom: 10px;
+  }
+  
