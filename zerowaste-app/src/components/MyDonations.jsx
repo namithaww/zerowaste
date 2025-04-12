@@ -1,38 +1,48 @@
 import React, { useEffect, useState } from "react";
 import { db, auth } from "../firebase";
-import { collection, query, where, getDocs, orderBy } from "firebase/firestore";
+import {
+  collection,
+  query,
+  where,
+  getDocs,
+  orderBy,
+} from "firebase/firestore";
+import { onAuthStateChanged } from "firebase/auth";
 
 const MyDonations = () => {
   const [donations, setDonations] = useState([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const fetchMyDonations = async () => {
-      try {
-        const user = auth.currentUser;
-        if (!user) return;
+    const unsubscribe = onAuthStateChanged(auth, async (user) => {
+      if (!user) {
+        setDonations([]);
+        setLoading(false);
+        return;
+      }
 
+      try {
         const q = query(
           collection(db, "donations"),
           where("donorId", "==", user.uid),
           orderBy("createdAt", "desc")
         );
 
-        const querySnapshot = await getDocs(q);
-        const myDonations = querySnapshot.docs.map((doc) => ({
+        const snapshot = await getDocs(q);
+        const donationList = snapshot.docs.map((doc) => ({
           id: doc.id,
           ...doc.data(),
         }));
 
-        setDonations(myDonations);
-        setLoading(false);
-      } catch (error) {
-        console.error("Error fetching donations:", error);
+        setDonations(donationList);
+      } catch (err) {
+        console.error("Error fetching donations:", err);
+      } finally {
         setLoading(false);
       }
-    };
+    });
 
-    fetchMyDonations();
+    return () => unsubscribe();
   }, []);
 
   if (loading) return <p>Loading your donations...</p>;
@@ -65,7 +75,9 @@ const MyDonations = () => {
                 </>
               )}
               <strong>Created:</strong>{" "}
-              {donation.createdAt?.toDate().toLocaleString()}
+              {donation.createdAt
+                ? donation.createdAt.toDate().toLocaleString()
+                : "Just now"}
             </li>
           ))}
         </ul>
