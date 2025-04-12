@@ -1,76 +1,82 @@
 import React, { useEffect, useState } from "react";
-import { db, auth } from "../firebase";
-import { collection, query, where, getDocs, addDoc } from "firebase/firestore";
+import { auth, db } from "../firebase";
+import { signOut } from "firebase/auth";
+import { collection, getDocs, query, where, orderBy } from "firebase/firestore";
+import { useNavigate } from "react-router-dom";
 
 const ReceiverDashboard = () => {
   const [donations, setDonations] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [requestedIds, setRequestedIds] = useState([]);
+  const navigate = useNavigate();
 
   useEffect(() => {
     const fetchAvailableDonations = async () => {
-      const user = auth.currentUser;
-      if (!user) return;
+      try {
+        const q = query(collection(db, "donations"), orderBy("createdAt", "desc"));
+        const querySnapshot = await getDocs(q);
+        const allDonations = querySnapshot.docs.map((doc) => ({
+          id: doc.id,
+          ...doc.data(),
+        }));
 
-      // Fetch donations already requested by the user
-      const reqQuery = query(collection(db, "requests"), where("receiverId", "==", user.uid));
-      const reqSnapshot = await getDocs(reqQuery);
-      const alreadyRequested = reqSnapshot.docs.map((doc) => doc.data().donationId);
-      setRequestedIds(alreadyRequested);
-
-      // Fetch all donations not made by the current user
-      const donationQuery = query(collection(db, "donations"), where("donorId", "!=", user.uid));
-      const donationSnapshot = await getDocs(donationQuery);
-
-      const donationList = donationSnapshot.docs
-        .map((doc) => ({ id: doc.id, ...doc.data() }))
-        .filter((donation) => !alreadyRequested.includes(donation.id)); // Exclude requested
-
-      setDonations(donationList);
-      setLoading(false);
+        setDonations(allDonations);
+      } catch (error) {
+        console.error("Error fetching donations for receiver:", error);
+      } finally {
+        setLoading(false);
+      }
     };
 
     fetchAvailableDonations();
   }, []);
 
-  const handleRequest = async (donationId) => {
+  const handleLogout = async () => {
     try {
-      const user = auth.currentUser;
-      if (!user) return;
-
-      await addDoc(collection(db, "requests"), {
-        donationId,
-        receiverId: user.uid,
-        status: "Pending",
-        createdAt: new Date(),
-      });
-
-      setRequestedIds((prev) => [...prev, donationId]);
-    } catch (err) {
-      console.error("Error requesting donation:", err);
+      await signOut(auth);
+      navigate("/");
+    } catch (error) {
+      console.error("Logout error:", error);
     }
   };
 
-  if (loading) return <p>Loading donations...</p>;
-
   return (
-    <div style={{ textAlign: "center" }}>
-      <h2>Available Donations</h2>
-      {donations.length === 0 ? (
-        <p>No available donations right now.</p>
+    <div style={{ padding: "30px", textAlign: "center" }}>
+      <h2>Receiver Dashboard</h2>
+
+      <button onClick={handleLogout} style={{ marginBottom: "20px" }}>
+        Logout
+      </button>
+
+      {loading ? (
+        <p>Loading available donations...</p>
+      ) : donations.length === 0 ? (
+        <p>No donations available at the moment.</p>
       ) : (
         <ul style={{ listStyle: "none", padding: 0 }}>
           {donations.map((donation) => (
-            <li key={donation.id} style={{ border: "1px solid #ccc", margin: "10px auto", padding: "10px", maxWidth: "500px" }}>
+            <li
+              key={donation.id}
+              style={{
+                border: "1px solid #ccc",
+                borderRadius: "10px",
+                padding: "15px",
+                marginBottom: "15px",
+                maxWidth: "500px",
+                margin: "auto",
+              }}
+            >
               <strong>Food Item:</strong> {donation.foodItem} <br />
               <strong>Quantity:</strong> {donation.quantity} <br />
               <strong>Location:</strong> {donation.location} <br />
-              <button
-                onClick={() => handleRequest(donation.id)}
-                disabled={requestedIds.includes(donation.id)}
-              >
-                {requestedIds.includes(donation.id) ? "Requested" : "Request Donation"}
-              </button>
+              {donation.additionalInfo && (
+                <>
+                  <strong>Additional Info:</strong> {donation.additionalInfo} <br />
+                </>
+              )}
+              <strong>Created:</strong>{" "}
+              {donation.createdAt?.toDate().toLocaleString()}
+              <br />
+              <button style={{ marginTop: "10px" }}>Request</button>
             </li>
           ))}
         </ul>
