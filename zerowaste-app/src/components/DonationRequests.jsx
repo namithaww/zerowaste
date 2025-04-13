@@ -97,10 +97,10 @@ const DonationRequests = () => {
           {requests.map((request) => (
             <li key={request.id} style={styles.card}>
               <p><strong>Donation ID:</strong> {request.donationId}</p>
-              <p><strong>Donation Item:</strong> {request.donationInfo?.foodName || "—"}</p>
+              <p><strong>Donation Item:</strong> {request.donationInfo?.foodItem || "—"}</p>
               <p><strong>Quantity:</strong> {request.donationInfo?.quantity || "—"}</p>
               <p><strong>Receiver Name:</strong> {request.receiverName}</p>
-              <p><strong>Message:</strong> {request.message || "—"}</p>
+              {/* <p><strong>Message:</strong> {request.message?.additionalInfo || "—"}</p> */}
               <p>
                 <strong>Status:</strong>{" "}
                 <span style={{ color: getStatusColor(request.status), fontWeight: 600 }}>
