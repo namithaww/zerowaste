@@ -1,29 +1,27 @@
 import React, { useEffect, useState } from "react";
 import { auth, db } from "../firebase";
 import { doc, getDoc } from "firebase/firestore";
-import { signOut as firebaseSignOut } from "firebase/auth";
 import { useNavigate } from "react-router-dom";
 import CreateDonation from "./CreateDonation";
 import MyDonations from "./MyDonations";
-import "./DonorDashboard.css"; // CSS styles
+import DonationRequests from "./DonationRequests";
+import TopBar from "../components/TopBar";
+import "./DonorDashboard.css";
 
 const Dashboard = () => {
   const [userData, setUserData] = useState({ name: "", role: "" });
+  const [activeTab, setActiveTab] = useState("create");
   const navigate = useNavigate();
 
   useEffect(() => {
     const fetchUserDetails = async () => {
       const user = auth.currentUser;
       if (!user) return;
-
       try {
         const userRef = doc(db, "users", user.uid);
         const userSnap = await getDoc(userRef);
-
         if (userSnap.exists()) {
           setUserData(userSnap.data());
-        } else {
-          console.warn("User document does not exist in Firestore.");
         }
       } catch (error) {
         console.error("Failed to fetch user data:", error);
@@ -33,41 +31,41 @@ const Dashboard = () => {
     fetchUserDetails();
   }, []);
 
-  const handleLogout = async () => {
-    try {
-      await firebaseSignOut(auth);
-      navigate("/");
-    } catch (err) {
-      console.error("Logout error:", err);
+  const renderTabContent = () => {
+    switch (activeTab) {
+      case "create":
+        return <CreateDonation />;
+      case "myDonations":
+        return <MyDonations />;
+      case "requests":
+        return <DonationRequests />;
+      default:
+        return null;
     }
   };
 
-  const user = auth.currentUser;
-
   return (
-    <div className="dashboard-container">
-      <div className="dashboard-header">
-        <h1>
-          Welcome,
-          <br />
-          <span>{userData.name || user?.email}</span>
-        </h1>
-        <p className="role-text">Role: {userData.role}</p>
-        <button onClick={handleLogout} className="logout-button">
-          Logout
-        </button>
-      </div>
+    <div className="dashboard-wrapper">
+      <TopBar username={userData.name || auth.currentUser?.email} />
 
-      <div className="dashboard-content">
-        <div className="create-section">
-          {/* <h2>Create a Donation</h2> */}
-          <CreateDonation />
-        </div>
-        <div className="my-donations-section">
-          {/* <h2>My Donations</h2> */}
-          <MyDonations />
-        </div>
-      </div>
+      <aside className="sidebar">
+        <h2 className="sidebar-title">Donor</h2>
+        <p className="sidebar-subtitle">{userData.name || auth.currentUser?.email}</p>
+        <button onClick={() => setActiveTab("create")} className={activeTab === "create" ? "active" : ""}>➕ Create</button>
+        <button onClick={() => setActiveTab("myDonations")} className={activeTab === "myDonations" ? "active" : ""}>📦 My Donations</button>
+        <button onClick={() => setActiveTab("requests")} className={activeTab === "requests" ? "active" : ""}>📥 Requests</button>
+      </aside>
+
+      <main className="dashboard-main">
+        <h1 className="dashboard-header">
+          {activeTab === "create"
+            ? "Create Donation"
+            : activeTab === "myDonations"
+            ? "My Donations"
+            : "Requests"}
+        </h1>
+        <div className="dashboard-content">{renderTabContent()}</div>
+      </main>
     </div>
   );
 };

@@ -23,8 +23,15 @@ const Auth = () => {
     setError("");
   };
 
+  const isValidEmail = (email) => /\S+@\S+\.\S+/.test(email);
+
   const handleSignup = async (e) => {
     e.preventDefault();
+    if (!isValidEmail(email)) {
+      setError("Please enter a valid email.");
+      return;
+    }
+
     try {
       const userCredential = await createUserWithEmailAndPassword(auth, email, password);
       await updateProfile(userCredential.user, { displayName: name });
@@ -34,19 +41,38 @@ const Auth = () => {
         email,
         role,
       });
-      navigate("/dashboard");
+      window.location.replace("/dashboard");
     } catch (err) {
-      setError(err.message);
+      let errorMessage = "Signup failed. Please try again.";
+      if (err.code === "auth/email-already-in-use") {
+        errorMessage = "Email is already in use.";
+      } else if (err.code === "auth/invalid-email") {
+        errorMessage = "Please enter a valid email.";
+      }
+      console.error(err.message);
+      setError(errorMessage);
     }
   };
 
   const handleLogin = async (e) => {
     e.preventDefault();
+    if (!isValidEmail(email)) {
+      setError("Please enter a valid email.");
+      return;
+    }
+
     try {
       await signInWithEmailAndPassword(auth, email, password);
-      navigate("/dashboard");
+      window.location.replace("/dashboard");
     } catch (err) {
-      setError("Invalid email or password");
+      let errorMessage = "Invalid email or password.";
+      if (err.code === "auth/user-not-found") {
+        errorMessage = "No user found with this email.";
+      } else if (err.code === "auth/wrong-password") {
+        errorMessage = "Incorrect password.";
+      }
+      console.error(err.message);
+      setError(errorMessage);
     }
   };
 
@@ -95,8 +121,10 @@ const Auth = () => {
           <button type="submit" style={styles.button}>
             {isSignup ? "Sign Up" : "Log In"}
           </button>
-          {error && <p style={styles.error}>{error}</p>}
         </form>
+
+        {error && <p style={styles.error}>{error}</p>}
+
         <p onClick={toggleMode} style={styles.toggle}>
           {isSignup ? "Already have an account? Log in" : "Don't have an account? Sign up"}
         </p>
@@ -109,25 +137,25 @@ const styles = {
   container: {
     height: "100vh",
     width: "100vw",
-    background: "#121212",
+    background: "#F2EFE7",
     display: "flex",
     justifyContent: "center",
     alignItems: "center",
-    fontFamily: "sans-serif",
+    fontFamily: "'Poppins', sans-serif",
   },
   card: {
     width: "100%",
     maxWidth: "400px",
-    backgroundColor: "#1E1E1E",
+    backgroundColor: "#FFFFFF",
     padding: "30px",
-    borderRadius: "10px",
-    boxShadow: "0 8px 20px rgba(0,0,0,0.6)",
+    borderRadius: "12px",
+    boxShadow: "0 8px 20px rgba(0,0,0,0.15)",
     textAlign: "center",
   },
   title: {
     marginBottom: "20px",
     fontSize: "24px",
-    color: "#ffffff",
+    color: "#006A71",
   },
   form: {
     display: "flex",
@@ -137,14 +165,14 @@ const styles = {
     padding: "12px",
     marginBottom: "15px",
     borderRadius: "6px",
-    border: "1px solid #444",
-    backgroundColor: "#2C2C2C",
-    color: "#fff",
+    border: "1px solid #9ACBD0",
+    backgroundColor: "#F2EFE7",
+    color: "#333",
     fontSize: "15px",
   },
   button: {
     padding: "12px",
-    backgroundColor: "#00BCD4", // cyan
+    backgroundColor: "#48A6A7",
     color: "#fff",
     border: "none",
     borderRadius: "6px",
@@ -155,12 +183,12 @@ const styles = {
   },
   toggle: {
     marginTop: "15px",
-    color: "#90CAF9", // light blue
+    color: "#006A71",
     cursor: "pointer",
     fontWeight: "500",
   },
   error: {
-    color: "#FF5252",
+    color: "#f44336",
     marginTop: "10px",
     fontSize: "14px",
   },

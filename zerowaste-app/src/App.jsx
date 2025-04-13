@@ -1,3 +1,4 @@
+import './Styles/global.css';
 import React, { useEffect, useState } from "react";
 import { Routes, Route, useNavigate } from "react-router-dom";
 import Auth from "./components/Auth";
@@ -5,6 +6,8 @@ import Dashboard from "./components/Dashboard";
 import ReceiverDashboard from "./components/ReceiverDashboard";
 import { auth, db } from "./firebase";
 import { doc, getDoc } from "firebase/firestore";
+import GeoMapDashboard from "./components/GeoMapDashboard";
+import 'leaflet/dist/leaflet.css';
 
 const App = () => {
   const [user, setUser] = useState(null);
@@ -43,6 +46,7 @@ const App = () => {
       {user && role === "Receiver" && (
         <Route path="/dashboard" element={<ReceiverDashboard />} />
       )}
+      <Route path="/map" element={<GeoMapDashboard />} />
       <Route path="*" element={<Auth />} />
     </Routes>
   );

@@ -1,72 +1,74 @@
-/* DonorDashboard.css */
+.dashboard-wrapper {
+  display: flex;
+  height: 100vh;
+  font-family: 'Segoe UI', sans-serif;
+  background-color: #f4f4f4;
+}
 
-body {
-    margin: 0;
-    font-family: 'Segoe UI', sans-serif;
-    background-color: #1c1c1c;
-    color: #fff;
-  }
-  
-  .dashboard-container {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    padding: 40px 20px;
-    max-width: 1200px;
-    margin: 0 auto;
-  }
-  
-  .dashboard-header {
-    text-align: center;
-    margin-bottom: 40px;
-  }
-  
-  .dashboard-header h1 {
-    font-size: 2.5rem;
-    margin-bottom: 10px;
-  }
-  
-  .dashboard-header span {
-    font-weight: bold;
-    color: #00ffff;
-  }
-  
-  .role-text {
-    font-size: 1.2rem;
-    color: #aaa;
-    margin-bottom: 20px;
-  }
-  
-  .logout-button {
-    padding: 10px 20px;
-    background-color: #ff4d4f;
-    color: white;
-    border: none;
-    border-radius: 6px;
-    cursor: pointer;
-    transition: background-color 0.3s ease;
-  }
-  
-  .logout-button:hover {
-    background-color: #ff7875;
-  }
-  
-  .dashboard-content {
-    display: flex;
-    justify-content: space-between;
-    align-items: flex-start;
-    width: 100%;
-    gap: 40px;
-  }
-  
-  .create-section,
-  .my-donations-section {
-    flex: 1;
-    min-width: 300px;
-  }
-  
-  .create-section h2,
-  .my-donations-section h2 {
-    margin-bottom: 10px;
-  }
-  
+.sidebar {
+  width: 220px;
+  background-color: #1a1a1a;
+  color: white;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+}
+
+.sidebar-title {
+  margin-top: 0;
+  font-size: 1.5rem;
+  margin-bottom: 5px;
+}
+
+.sidebar-subtitle {
+  font-size: 0.9rem;
+  color: #aaa;
+  margin-bottom: 30px;
+}
+
+.sidebar button {
+  background: none;
+  border: none;
+  color: #ddd;
+  padding: 10px;
+  text-align: left;
+  margin-bottom: 8px;
+  font-size: 1rem;
+  cursor: pointer;
+  border-radius: 4px;
+  transition: background 0.3s;
+}
+
+.sidebar button.active,
+.sidebar button:hover {
+  background-color: #00bcd4;
+  color: #000;
+}
+
+.logout-button {
+  margin-top: auto;
+  background-color: #e53935;
+  color: white;
+  padding: 10px;
+  border: none;
+  border-radius: 4px;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+.dashboard-main {
+  flex: 1;
+  padding: 40px;
+  overflow-y: auto;
+}
+
+.dashboard-header {
+  font-size: 2rem;
+  margin-bottom: 20px;
+}
+
+.dashboard-content {
+  background-color: #ffffff;
+  border-radius: 8px;
+  padding: 20px;
+}
