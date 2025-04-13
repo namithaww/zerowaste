@@ -1,59 +1,71 @@
 import React, { useEffect, useState } from "react";
 import { auth, db } from "../firebase";
-import { signOut } from "firebase/auth";
 import { doc, getDoc } from "firebase/firestore";
 import { useNavigate } from "react-router-dom";
 import CreateDonation from "./CreateDonation";
 import MyDonations from "./MyDonations";
+import DonationRequests from "./DonationRequests";
+import TopBar from "../components/TopBar";
+import "./DonorDashboard.css";
 
 const Dashboard = () => {
-  const [role, setRole] = useState(null);
+  const [userData, setUserData] = useState({ name: "", role: "" });
+  const [activeTab, setActiveTab] = useState("create");
   const navigate = useNavigate();
 
   useEffect(() => {
-    const fetchUserRole = async () => {
+    const fetchUserDetails = async () => {
       const user = auth.currentUser;
       if (!user) return;
-
-      const docRef = doc(db, "users", user.uid);
-      const docSnap = await getDoc(docRef);
-
-      if (docSnap.exists()) {
-        const userRole = docSnap.data().role;
-        setRole(userRole.toLowerCase()); // Normalize to lowercase
-      } else {
-        console.log("No such document!");
+      try {
+        const userRef = doc(db, "users", user.uid);
+        const userSnap = await getDoc(userRef);
+        if (userSnap.exists()) {
+          setUserData(userSnap.data());
+        }
+      } catch (error) {
+        console.error("Failed to fetch user data:", error);
       }
     };
 
-    fetchUserRole();
+    fetchUserDetails();
   }, []);
 
-  const handleLogout = async () => {
-    await signOut(auth);
-    navigate("/");
+  const renderTabContent = () => {
+    switch (activeTab) {
+      case "create":
+        return <CreateDonation />;
+      case "myDonations":
+        return <MyDonations />;
+      case "requests":
+        return <DonationRequests />;
+      default:
+        return null;
+    }
   };
 
   return (
-    <div style={{ textAlign: "center", marginTop: "50px" }}>
-      <h1>Welcome to ZeroWaste Dashboard</h1>
+    <div className="dashboard-wrapper">
+      <TopBar username={userData.name || auth.currentUser?.email} />
 
-      {role === "donor" && (
-        <>
-          <p>You are a Donor. You can create food donation listings here.</p>
-          <CreateDonation />
-          <MyDonations/>
-        </>
-      )}
+      <aside className="sidebar">
+        <h2 className="sidebar-title">Donor</h2>
+        <p className="sidebar-subtitle">{userData.name || auth.currentUser?.email}</p>
+        <button onClick={() => setActiveTab("create")} className={activeTab === "create" ? "active" : ""}>➕ Create</button>
+        <button onClick={() => setActiveTab("myDonations")} className={activeTab === "myDonations" ? "active" : ""}>📦 My Donations</button>
+        <button onClick={() => setActiveTab("requests")} className={activeTab === "requests" ? "active" : ""}>📥 Requests</button>
+      </aside>
 
-      {role === "receiver" && (
-        <p>You are a Receiver. You can explore food listings near you.</p>
-      )}
-
-      {!role && <p>Loading your role...</p>}
-
-      <br />
-      <button onClick={handleLogout}>Logout</button>
+      <main className="dashboard-main">
+        <h1 className="dashboard-header">
+          {activeTab === "create"
+            ? "Create Donation"
+            : activeTab === "myDonations"
+            ? "My Donations"
+            : "Requests"}
+        </h1>
+        <div className="dashboard-content">{renderTabContent()}</div>
+      </main>
     </div>
   );
 };

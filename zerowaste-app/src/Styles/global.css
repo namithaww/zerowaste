@@ -1,0 +1,92 @@
+/* src/Styles/Global.css */
+
+:root {
+  --bg-light: #f2efe7;
+  --primary: #48a6a7;
+  --secondary: #9acbd0;
+  --dark: #006a71;
+  --text-dark: #1f1f1f;
+  --text-light: #ffffff;
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  background-color: var(--bg-light);
+  color: var(--text-dark);
+}
+
+/* Basic utility styles */
+.container {
+  padding: 20px;
+  max-width: 1200px;
+  margin: auto;
+}
+
+h1, h2, h3 {
+  color: var(--dark);
+}
+
+a {
+  color: var(--primary);
+  text-decoration: none;
+}
+
+a:hover {
+  text-decoration: underline;
+}
+
+/* Buttons */
+button {
+  background-color: var(--primary);
+  color: var(--text-light);
+  padding: 10px 20px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+}
+body {
+  background-color: #9ACBD0 !important;
+}
+body {
+  font-family: 'Poppins', sans-serif;
+}
+
+button:hover {
+  background-color: var(--dark);
+}
+
+/* Card UI */
+.card {
+  background-color: var(--secondary); /* changed from white */
+  padding: 20px;
+  border-radius: 10px;
+  margin-bottom: 15px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+
+/* Form Inputs */
+input, select, textarea {
+  padding: 10px;
+  width: 100%;
+  margin: 10px 0;
+  border: 1px solid var(--primary);
+  border-radius: 5px;
+}
+
+/* Header / Navbar */
+.navbar {
+  background-color: var(--dark);
+  padding: 15px;
+  color: var(--text-light);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.navbar a {
+  color: var(--text-light);
+  margin-left: 15px;
+}
