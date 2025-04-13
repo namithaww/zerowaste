@@ -4,7 +4,7 @@ Selected Domain: Web development
 
 Problem Statement: “ZeroWaste – AI Powered Geo-Intelligent Food Donation & Rescue System”
 
-Our Solution: ZeroWaste
+Our Solution:
 ZeroWaste is geo-intelligent food donation and rescue system designed to bridge the gap between donors and receivers. The platform empowers food donors (restaurants, individuals, businesses) to easily list excess food items with automatic location tagging. Meanwhile, receivers (e.g., NGOs, shelters, community kitchens) can browse available donations in real-time on an interactive map, request items nearby, and track the donation lifecycle from request to verification.
 
 Features for Donors:
