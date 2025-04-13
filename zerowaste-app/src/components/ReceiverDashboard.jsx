@@ -11,14 +11,14 @@ import {
   getDoc,
 } from "firebase/firestore";
 import TopBar from "../components/TopBar";
-import GeoMapDashboard from "../components/GeoMapDashboard"; // Make sure this works
+import GeoMapDashboard from "../components/GeoMapDashboard";
 
 const ReceiverDashboard = () => {
   const [donations, setDonations] = useState([]);
   const [requests, setRequests] = useState([]);
   const [receiverName, setReceiverName] = useState("");
   const [loading, setLoading] = useState(true);
-  const [showMap, setShowMap] = useState(false); // NEW
+  const [showMap, setShowMap] = useState(false);
 
   const fetchData = async () => {
     setLoading(true);
@@ -60,14 +60,24 @@ const ReceiverDashboard = () => {
       const donationSnap = await getDoc(donationRef);
       const donation = donationSnap.data();
 
+      if (!donation || !donation.foodItem || !donation.quantity) {
+        console.error("Invalid donation data:", donation);
+        return;
+      }
+
       await addDoc(collection(db, "requests"), {
         donationId,
-        foodName: donation.foodName,
+        donorId: donation.donorId,
+        donorName: donation.donorName || "",
+        foodItem: donation.foodItem,
         quantity: donation.quantity,
         receiverId: user.uid,
         receiverName: user.displayName || "Receiver",
         status: "Pending",
-        message: "",
+        type: donation.type || "",
+        location: donation.location || "",
+        pickupDeadline: donation.pickupDeadline || "",
+        additionalInfo: donation.additionalInfo || "",
       });
 
       await updateDoc(donationRef, { status: "Pending" });
@@ -107,7 +117,6 @@ const ReceiverDashboard = () => {
     <div style={styles.container}>
       <TopBar username={receiverName} onToggleMap={() => setShowMap(!showMap)} />
 
-      {/* Map Section (Toggle with button) */}
       {showMap && (
         <section>
           <h3 style={styles.subheading}>Nearby Donations Map</h3>
@@ -125,7 +134,7 @@ const ReceiverDashboard = () => {
           <ul style={styles.list}>
             {availableDonations.map((donation) => (
               <li key={donation.id} style={styles.card}>
-                <p><strong>Item:</strong> {donation.foodName}</p>
+                <p><strong>Item:</strong> {donation.foodItem}</p>
                 <p><strong>Quantity:</strong> {donation.quantity}</p>
                 <p><strong>Status:</strong> {donation.status}</p>
                 <button
@@ -148,7 +157,7 @@ const ReceiverDashboard = () => {
           <ul style={styles.list}>
             {requests.map((req) => (
               <li key={req.id} style={styles.card}>
-                <p><strong>Item:</strong> {req.foodName || "—"}</p>
+                <p><strong>Item:</strong> {req.foodItem || "—"}</p>
                 <p><strong>Quantity:</strong> {req.quantity || "—"}</p>
                 <p>
                   <strong>Status:</strong>{" "}
